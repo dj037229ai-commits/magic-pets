@@ -1,11 +1,11 @@
-const CACHE_VERSION = 'mistry-pets-v1';
+const CACHE_VERSION = 'mistry-pets-v2';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then((cache) => cache.addAll(['/', '/manifest.webmanifest', '/icons/icon-192x192.png', '/icons/icon-512x512.png']))
+      .then((cache) => cache.addAll(['/', '/manifest.webmanifest', '/icons/magic-pets-forest-fox-192.png', '/icons/magic-pets-forest-fox-512.png']))
       .then(() => self.skipWaiting())
   );
 });
