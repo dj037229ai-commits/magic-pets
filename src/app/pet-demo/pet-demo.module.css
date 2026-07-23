@@ -2305,6 +2305,8 @@
 .sponsorCard > button { padding: 8px 9px; border: 0; border-radius: 11px; color: #fff; background: #755bd0; font-size: .58rem; font-weight: 900; }
 .sponsorCard > button:disabled { color: #91869c; background: #e4dee8; }
 .sponsorCard > small { position: absolute; right: 13px; bottom: -14px; color: #9685a5; font-size: .51rem; }
+.taskGiftStatus { margin: 18px 4px 0; display: flex; align-items: flex-start; gap: 5px; color: #806a98; font-size: .56rem; line-height: 1.45; }
+.taskGiftStatus svg { flex: 0 0 auto; margin-top: 1px; color: #c28a2e; }
 
 .rewardHistory { margin-top: 25px; padding: 11px; border: 1px solid #e7dfed; border-radius: 15px; background: rgba(255, 255, 255, .64); }
 .rewardHistory summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; list-style: none; }

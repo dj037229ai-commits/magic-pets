@@ -82,6 +82,8 @@ type DailyState = {
     cloudHop: number;
   };
   sponsorViews: number;
+  taskGiftClaimed: boolean;
+  taskGiftItemId: string | null;
   fedPetIds: PetId[];
   playedPetIds: PetId[];
   taskClaims: Record<TaskId, boolean>;
@@ -121,7 +123,7 @@ type SponsorReward = {
 };
 
 type GameState = {
-  version: 11;
+  version: 12;
   onboardingComplete: boolean;
   ageBand: AgeBand | null;
   activePetId: PetId;
@@ -367,11 +369,11 @@ const AFFECTION_REWARDS: LevelReward[] = [
 ];
 
 const TASKS: Array<{ id: TaskId; label: string; detail: string; reward: number; icon: string }> = [
-  { id: 'pet', label: '溫柔摸摸', detail: '摸目前的寵物 1 次', reward: 5, icon: '🫳' },
-  { id: 'feed', label: '開心吃飯', detail: '餵目前的寵物 1 次', reward: 5, icon: '🍪' },
-  { id: 'play', label: '一起玩耍', detail: '使用玩具互動 1 次', reward: 6, icon: '🧸' },
+  { id: 'pet', label: '溫柔摸摸', detail: '摸目前的寵物 1 次', reward: 10, icon: '🫳' },
+  { id: 'feed', label: '開心吃飯', detail: '餵目前的寵物 1 次', reward: 10, icon: '🍪' },
+  { id: 'play', label: '一起玩耍', detail: '使用玩具互動 1 次', reward: 12, icon: '🧸' },
   { id: 'fortune', label: '今日占卜', detail: '完成 1 次占卜', reward: 8, icon: '🔮' },
-  { id: 'purchase', label: '布置小屋', detail: '購買 1 件物品或能力', reward: 10, icon: '🎁' },
+  { id: 'purchase', label: '布置小屋', detail: '購買 1 件物品或能力', reward: 20, icon: '🎁' },
 ];
 
 const DECKS: FortuneDeckDefinition[] = [
@@ -467,6 +469,8 @@ const emptyDaily = (date = ''): DailyState => ({
   gameBestScore: 0,
   gameBestScores: { starChase: 0, obstacleHop: 0, cloudHop: 0 },
   sponsorViews: 0,
+  taskGiftClaimed: false,
+  taskGiftItemId: null,
   fedPetIds: [],
   playedPetIds: [],
   taskClaims: { pet: false, feed: false, play: false, fortune: false, purchase: false },
@@ -496,7 +500,7 @@ const emptyPetProgress = (date = localDateKey()): PetProgress => ({
 });
 
 const createDefaultGame = (): GameState => ({
-  version: 11,
+  version: 12,
   onboardingComplete: false,
   ageBand: null,
   activePetId: 'star-cat',
@@ -557,6 +561,43 @@ function pickLoginGift(progress: PetProgress, petId: PetId) {
   const newToys = candidates.filter((item) => item.kind === '食物' || !progress.ownedItems.includes(item.id));
   const pool = newToys.length > 0 ? newToys : candidates;
   return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function pickTaskFood(petId: PetId) {
+  const candidates = SHOP_ITEMS.filter((item) => item.kind === '食物' && (!item.petOnly || item.petOnly.includes(petId)));
+  return candidates[Math.floor(Math.random() * candidates.length)] ?? SHOP_ITEMS.find((item) => item.kind === '食物');
+}
+
+function applyDailyTaskFoodReward(current: GameState, daily: DailyState) {
+  const allTasksClaimed = TASKS.every((task) => daily.taskClaims[task.id]);
+  const sponsorComplete = daily.sponsorViews >= SPONSOR_DAILY_LIMIT;
+  if (!allTasksClaimed || !sponsorComplete || daily.taskGiftClaimed) {
+    return { game: { ...current, daily }, gift: null as ShopItem | null };
+  }
+
+  const gift = pickTaskFood(current.activePetId);
+  if (!gift) {
+    return {
+      game: { ...current, daily: { ...daily, taskGiftClaimed: true } },
+      gift: null as ShopItem | null,
+    };
+  }
+
+  const progress = current.pets[current.activePetId];
+  return {
+    game: {
+      ...current,
+      pets: {
+        ...current.pets,
+        [current.activePetId]: {
+          ...progress,
+          consumables: { ...progress.consumables, [gift.id]: (progress.consumables[gift.id] ?? 0) + 1 },
+        },
+      },
+      daily: { ...daily, taskGiftClaimed: true, taskGiftItemId: gift.id },
+    },
+    gift,
+  };
 }
 
 function normaliseDecorationPositions(saved: unknown): Record<string, RoomItemPosition> {
@@ -639,6 +680,8 @@ function normaliseDailyState(saved: Partial<DailyState> | undefined, today: stri
     gameBestScores: savedGameBestScores,
     fortuneRewardClaims: savedFortuneRewardClaims,
     taskClaims: { ...emptyDaily(today).taskClaims, ...saved?.taskClaims },
+    taskGiftClaimed: Boolean(saved?.taskGiftClaimed),
+    taskGiftItemId: typeof saved?.taskGiftItemId === 'string' ? saved.taskGiftItemId : null,
   };
 }
 
@@ -662,7 +705,7 @@ function normaliseImportedGame(candidate: unknown): GameState {
   return {
     ...defaults,
     ...parsed,
-    version: 11,
+    version: 12,
     onboardingComplete: Boolean(parsed.onboardingComplete),
     ageBand: parsed.ageBand === '7-12' || parsed.ageBand === '13-15' ? parsed.ageBand : null,
     activePetId,
@@ -784,11 +827,13 @@ function loadAndMigrateGame(): GameState {
         gameBestScores: savedGameBestScores,
         fortuneRewardClaims: savedFortuneRewardClaims,
         taskClaims: { ...emptyDaily(today).taskClaims, ...parsed.daily?.taskClaims },
+        taskGiftClaimed: Boolean(parsed.daily?.taskGiftClaimed),
+        taskGiftItemId: typeof parsed.daily?.taskGiftItemId === 'string' ? parsed.daily.taskGiftItemId : null,
       };
       return {
         ...defaults,
         ...parsed,
-        version: 11,
+        version: 12,
         pets,
         daily: daily.date === today ? daily : emptyDaily(today),
         loginStreak: normaliseLoginStreak(parsed.loginStreak),
@@ -1409,12 +1454,10 @@ export default function PetDemoPage() {
   const claimTask = (taskId: TaskId) => {
     const task = TASKS.find((item) => item.id === taskId);
     if (!task || !taskDone[taskId] || game.daily.taskClaims[taskId]) return;
-    setGame((current) => ({
-      ...current,
-      coins: current.coins + task.reward,
-      daily: { ...current.daily, taskClaims: { ...current.daily.taskClaims, [taskId]: true } },
-    }));
-    showToast(`任務完成，獲得 ${task.reward} 星幣！`);
+    const nextDaily = { ...game.daily, taskClaims: { ...game.daily.taskClaims, [taskId]: true } };
+    const result = applyDailyTaskFoodReward({ ...game, coins: game.coins + task.reward }, nextDaily);
+    setGame(result.game);
+    showToast(result.gift ? `任務完成，獲得 ${task.reward} 星幣與${result.gift.name}！` : `任務完成，獲得 ${task.reward} 星幣！`);
   };
 
   const drawFortune = () => {
@@ -1683,14 +1726,15 @@ export default function PetDemoPage() {
       time: now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }),
       reward: SPONSOR_REWARD,
     };
-    setGame((current) => ({
-      ...current,
-      coins: current.coins + SPONSOR_REWARD,
-      daily: { ...current.daily, sponsorViews: current.daily.sponsorViews + 1 },
-      sponsorHistory: [record, ...current.sponsorHistory].slice(0, 20),
-    }));
+    const nextDaily = { ...game.daily, sponsorViews: game.daily.sponsorViews + 1 };
+    const result = applyDailyTaskFoodReward({
+      ...game,
+      coins: game.coins + SPONSOR_REWARD,
+      sponsorHistory: [record, ...game.sponsorHistory].slice(0, 20),
+    }, nextDaily);
+    setGame(result.game);
     setSponsorOpen(false);
-    showToast(`星光贊助獲得 ${SPONSOR_REWARD} 星幣！`);
+    showToast(result.gift ? `星光贊助獲得 ${SPONSOR_REWARD} 星幣，全勤禮物是${result.gift.name}！` : `星光贊助獲得 ${SPONSOR_REWARD} 星幣！`);
   };
 
   const verifyParent = () => {
@@ -1795,6 +1839,7 @@ export default function PetDemoPage() {
   const fortuneCardCount = 6;
   const revealedFortuneCard = fortuneCards.find((card) => card.id === selectedFortuneCard) ?? null;
   const foodItems = SHOP_ITEMS.filter((item) => item.kind === '食物' && (!item.petOnly || item.petOnly.includes(activePet.id)));
+  const taskGiftItem = game.daily.taskGiftItemId ? SHOP_ITEMS.find((item) => item.id === game.daily.taskGiftItemId) : null;
   const ownedToys = SHOP_ITEMS.filter((item) => item.kind === '玩具' && (!item.petOnly || item.petOnly.includes(activePet.id)) && activeProgress.ownedItems.includes(item.id));
   const equippedDecorationCount = activeProgress.equippedItems.filter((id) => SHOP_ITEMS.find((item) => item.id === id)?.kind === '裝飾').length;
   const filteredShopItems = SHOP_ITEMS.filter((item) => {
@@ -2129,6 +2174,8 @@ export default function PetDemoPage() {
                 <button type="button" onClick={openSponsor} disabled={game.daily.sponsorViews >= SPONSOR_DAILY_LIMIT}>{game.daily.sponsorViews >= SPONSOR_DAILY_LIMIT ? '明天再來' : `觀看 +${SPONSOR_REWARD}`}</button>
                 <small>今日 {game.daily.sponsorViews}/{SPONSOR_DAILY_LIMIT} 次</small>
               </article>
+
+              <p className={styles.taskGiftStatus}><Gift size={14} />{game.daily.taskGiftClaimed ? `今日全勤獎勵：${taskGiftItem?.name ?? '寵物食物'}` : `完成全部 ${TASKS.length} 項任務並領完 ${SPONSOR_DAILY_LIMIT} 次贊助，可獲得隨機寵物食物`}</p>
 
               <details className={styles.rewardHistory}>
                 <summary>
