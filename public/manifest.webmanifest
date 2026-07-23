@@ -1,0 +1,26 @@
+{
+  "name": "魔法寵物 | MISTRY PETS",
+  "short_name": "魔法寵物",
+  "description": "照顧專屬魔法寵物、抽取每日小語，和寵物一起玩可愛小遊戲。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#15102f",
+  "theme_color": "#6f58cf",
+  "orientation": "portrait-primary",
+  "lang": "zh-TW",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
