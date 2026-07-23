@@ -2130,10 +2130,15 @@ export default function PetDemoPage() {
                 <small>今日 {game.daily.sponsorViews}/{SPONSOR_DAILY_LIMIT} 次</small>
               </article>
 
-              <section className={styles.rewardHistory} aria-label="贊助獎勵紀錄">
-                <div><b>贊助獎勵紀錄</b><span>每日最多 2 次</span></div>
-                {game.sponsorHistory.length === 0 ? <p>還沒有紀錄，完成一次測試贊助後會顯示在這裡。</p> : game.sponsorHistory.slice(0, 4).map((record) => <p key={record.id}><span>{record.date}　{record.time}</span><strong>+{record.reward} 星幣</strong></p>)}
-              </section>
+              <details className={styles.rewardHistory}>
+                <summary>
+                  <span className={styles.rewardHistoryTitle}><b>贊助獎勵紀錄</b><small>共 {game.sponsorHistory.length} 筆 · 每日最多 2 次</small></span>
+                  <span className={styles.rewardHistoryChevron} aria-hidden="true">⌄</span>
+                </summary>
+                <div className={styles.rewardHistoryBody}>
+                  {game.sponsorHistory.length === 0 ? <p>還沒有紀錄，完成一次測試贊助後會顯示在這裡。</p> : game.sponsorHistory.map((record) => <p key={record.id}><span>{record.date}　{record.time}</span><strong>+{record.reward} 星幣</strong></p>)}
+                </div>
+              </details>
 
               <p className={styles.resetNote}><CircleHelp size={14} /> 每天午夜重置任務與贊助次數</p>
               <div className={styles.safetyLinks}><button type="button" onClick={() => setInfoModal('privacy')}><ShieldCheck size={14} /> 隱私與兒童安全</button><button type="button" onClick={() => setInfoModal('parent-gate')}><Users size={14} /> 家長入口</button></div>

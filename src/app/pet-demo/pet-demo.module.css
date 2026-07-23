@@ -2307,12 +2307,19 @@
 .sponsorCard > small { position: absolute; right: 13px; bottom: -14px; color: #9685a5; font-size: .51rem; }
 
 .rewardHistory { margin-top: 25px; padding: 11px; border: 1px solid #e7dfed; border-radius: 15px; background: rgba(255, 255, 255, .64); }
-.rewardHistory > div { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+.rewardHistory summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; list-style: none; }
+.rewardHistory summary::-webkit-details-marker { display: none; }
+.rewardHistory summary::marker { display: none; }
+.rewardHistory summary:focus-visible { outline: 2px solid #8a73d8; outline-offset: 4px; border-radius: 6px; }
+.rewardHistoryTitle { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .rewardHistory b { color: #574274; font-size: .66rem; }
-.rewardHistory > div span { color: #9586a2; font-size: .53rem; }
-.rewardHistory p { margin: 0; padding: 5px 0; display: flex; justify-content: space-between; gap: 8px; border-top: 1px dashed #e4dce9; color: #8c7f97; font-size: .55rem; line-height: 1.4; }
-.rewardHistory p:first-of-type { border-top: 0; }
-.rewardHistory strong { color: #bd7f28; white-space: nowrap; }
+.rewardHistoryTitle small { color: #9586a2; font-size: .53rem; }
+.rewardHistoryChevron { flex: 0 0 auto; color: #7a62be; font-size: 1rem; font-weight: 900; line-height: 1; transform: translateY(-2px); transition: transform .2s ease; }
+.rewardHistory[open] .rewardHistoryChevron { transform: rotate(180deg) translateY(2px); }
+.rewardHistoryBody { margin-top: 7px; }
+.rewardHistoryBody p { margin: 0; padding: 5px 0; display: flex; justify-content: space-between; gap: 8px; border-top: 1px dashed #e4dce9; color: #8c7f97; font-size: .55rem; line-height: 1.4; }
+.rewardHistoryBody p:first-child { border-top: 0; }
+.rewardHistoryBody strong { color: #bd7f28; white-space: nowrap; }
 .safetyLinks { margin-top: 10px; display: flex; justify-content: center; gap: 12px; }
 .safetyLinks button { padding: 4px 0; display: flex; align-items: center; gap: 4px; border: 0; color: #786690; background: transparent; font-size: .56rem; font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
 
