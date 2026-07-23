@@ -410,7 +410,7 @@ function isFortuneDeckOpen(deck: FortuneDeckDefinition, hour: number) {
 }
 
 function getDailyLuckyColor() {
-  const dateSeed = Number(localDateKey().replaceAll('-', ''));
+  const dateSeed = Number(localDateKey().replace(/-/g, ''));
   return LUCKY_COLORS[dateSeed % LUCKY_COLORS.length];
 }
 
@@ -2027,7 +2027,7 @@ export default function PetDemoPage() {
                 } : undefined;
                 return <span
                   key={item.id}
-                  className={`${styles.roomItem} ${styles[item.id.replaceAll('-', '')]} ${draggingRoomItem === item.id ? styles.roomItemDragging : ''}`}
+                  className={`${styles.roomItem} ${styles[item.id.replace(/-/g, '')]} ${draggingRoomItem === item.id ? styles.roomItemDragging : ''}`}
                   data-art={item.art ? 'image' : 'emoji'}
                   style={positionStyle}
                   onPointerDown={(event) => beginRoomItemDrag(item.id, event)}

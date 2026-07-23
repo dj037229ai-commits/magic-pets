@@ -32,7 +32,10 @@ const BGM_TRACKS: Record<PetBgmTrack, { bpm: number; notes: number[]; wave: Osci
 
 const getAudioContext = () => {
   if (typeof window === 'undefined') return null;
-  if (!audioContext) audioContext = new window.AudioContext();
+  const AudioContextConstructor = window.AudioContext
+    || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioContextConstructor) return null;
+  if (!audioContext) audioContext = new AudioContextConstructor();
   if (audioContext.state === 'suspended') void audioContext.resume();
   return audioContext;
 };

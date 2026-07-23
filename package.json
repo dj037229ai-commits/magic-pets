@@ -21,5 +21,9 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "typescript": "^5"
-  }
+  },
+  "browserslist": [
+    "ios_saf >= 12.0",
+    "safari >= 12.0"
+  ]
 }

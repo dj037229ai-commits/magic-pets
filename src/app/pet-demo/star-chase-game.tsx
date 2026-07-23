@@ -121,6 +121,10 @@ export default function StarChaseGame({ bestScore, dailyBestScore, dailyGameAtte
     };
 
     updateArenaSize();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', updateArenaSize);
+      return () => window.removeEventListener('resize', updateArenaSize);
+    }
     const resizeObserver = new ResizeObserver(updateArenaSize);
     resizeObserver.observe(arena);
     return () => resizeObserver.disconnect();

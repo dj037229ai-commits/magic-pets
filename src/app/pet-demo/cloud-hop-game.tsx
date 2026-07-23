@@ -161,6 +161,10 @@ export default function CloudHopGame({ bestScore, dailyBestScore, dailyGameAttem
       };
     };
     updateSize();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', updateSize);
+      return () => window.removeEventListener('resize', updateSize);
+    }
     const observer = new ResizeObserver(updateSize);
     observer.observe(arena);
     return () => observer.disconnect();
