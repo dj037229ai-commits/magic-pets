@@ -222,7 +222,7 @@ const PETS: PetDefinition[] = [
     image: '/images/pet-demo/star-cat-house.png',
     roomImage: '/images/pet-demo/star-cat-house-empty-clean.png',
     description: '喜歡觀察星星，會陪你抽取每日魔法小語。',
-    unlockPrice: 160,
+    unlockPrice: 168,
     accent: '#7760d7',
   },
   {
@@ -233,7 +233,7 @@ const PETS: PetDefinition[] = [
     image: '/images/pet-demo/cloud-rabbit-house.png',
     roomImage: '/images/pet-demo/cloud-rabbit-house-empty.png',
     description: '住在彩虹和雲朵中，最會替心情放晴。',
-    unlockPrice: 180,
+    unlockPrice: 168,
     accent: '#6aaee8',
   },
   {
@@ -244,7 +244,7 @@ const PETS: PetDefinition[] = [
     image: '/images/pet-demo/forest-fox-house.png',
     roomImage: '/images/pet-demo/forest-fox-house-empty.png',
     description: '勇敢又細心，喜歡收集森林裡的小發現。',
-    unlockPrice: 200,
+    unlockPrice: 168,
     accent: '#8b9c38',
   },
   {
@@ -255,7 +255,7 @@ const PETS: PetDefinition[] = [
     image: '/images/pet-demo/ocean-dragon-house.png',
     roomImage: '/images/pet-demo/ocean-dragon-house-empty.png',
     description: '在月光海上守護好夢，也喜歡追逐泡泡。',
-    unlockPrice: 220,
+    unlockPrice: 168,
     accent: '#367fc4',
   },
 ];
@@ -504,7 +504,7 @@ const createDefaultGame = (): GameState => ({
   onboardingComplete: false,
   ageBand: null,
   activePetId: 'star-cat',
-  unlockedPetIds: ['star-cat'],
+  unlockedPetIds: [],
   coins: 120,
   pets: {
     'star-cat': emptyPetProgress(),
@@ -1189,9 +1189,9 @@ export default function PetDemoPage() {
       onboardingComplete: true,
       ageBand: starterAge,
       activePetId: starterPetId,
-      unlockedPetIds: current.unlockedPetIds.includes(starterPetId)
-        ? current.unlockedPetIds
-        : [...current.unlockedPetIds, starterPetId],
+      unlockedPetIds: current.onboardingComplete
+        ? (current.unlockedPetIds.includes(starterPetId) ? current.unlockedPetIds : [...current.unlockedPetIds, starterPetId])
+        : [starterPetId],
     }));
     startBgm(starterPetId);
     showToast('歡迎來到你的魔法小屋！');
@@ -2262,7 +2262,7 @@ export default function PetDemoPage() {
           <section className={`${styles.modalCard} ${styles.onboardingCard}`}>
             <div className={styles.modalEyebrow}><PawPrint size={16} /> 第一次來到魔法小屋</div>
             <h2 id="welcome-title">選一位最喜歡的寵物夥伴</h2>
-            <p>第一次選擇免費，牠會帶你住進自己的專屬房屋。其他夥伴之後可用星幣解鎖。</p>
+            <p>第一次選擇的寵物免費入住自己的專屬房屋；其他夥伴包含星星貓，之後都需要 168 星幣解鎖。</p>
             <div className={styles.starterPetGrid}>
               {PETS.map((pet) => <button key={pet.id} type="button" className={starterPetId === pet.id ? styles.starterPetActive : ''} style={{ '--pet-accent': pet.accent } as React.CSSProperties} onClick={() => setStarterPetId(pet.id)}><span className={styles.petPreview}><Image src={pet.image} alt={`${pet.name}的${pet.houseName}`} fill sizes="180px" /></span><b>{pet.emoji} {pet.name}</b><small>{pet.houseName}</small></button>)}
             </div>
